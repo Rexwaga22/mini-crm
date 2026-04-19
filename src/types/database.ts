@@ -185,6 +185,9 @@ export type Database = {
         }
       }
     }
+    Views: {
+        [_ in never]: never
+    }
     Functions: {
       get_inactivity_report: {
         Returns: Array<{
@@ -213,6 +216,12 @@ export type Database = {
         Args: { rep_id: string }
         Returns: void
       }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

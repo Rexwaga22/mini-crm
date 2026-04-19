@@ -1,4 +1,4 @@
-import Papa from 'papaparse'
+import Papa, { ParseResult } from 'papaparse'
 import { normalisePhone } from './phone'
 
 export interface CsvRow {
@@ -32,14 +32,14 @@ export function parseCsvFile(file: File): Promise<CsvParseResult> {
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
-      transformHeader: (h) => h.toLowerCase().trim().replace(/\s+/g, '_'),
-      complete(results) {
+      transformHeader: (h: string) => h.toLowerCase().trim().replace(/\s+/g, '_'),
+      complete(results: ParseResult<Record<string, string>>) {
         const seenPhones = new Set<string>()
         const valid: ParsedLead[] = []
         const flagged: ParsedLead[] = []
         const duplicates: ParsedLead[] = []
 
-        results.data.forEach((row, idx) => {
+        results.data.forEach((row: Record<string, string>, idx: number) => {
           const rawPhone =
             row['phone_number'] ||
             row['phone'] ||
@@ -88,7 +88,7 @@ export function parseCsvFile(file: File): Promise<CsvParseResult> {
 
         resolve({ valid, flagged, duplicates, total: results.data.length })
       },
-      error(err) {
+      error(err: Error) {
         reject(err)
       },
     })
