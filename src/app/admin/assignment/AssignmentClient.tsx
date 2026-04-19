@@ -37,6 +37,7 @@ export default function AssignmentClient({ unassignedCount, unassignedLeadIds, d
       .filter(r => r.leadsToReceive > 0)
       .map(r => r.id)
 
+    // @ts-expect-error - Supabase generic typing for rpc args sometimes resolves Args to undefined depending on tsconfig strictness
     const { error: rpcErr } = await supabase.rpc('even_split_assign', {
       lead_ids: unassignedLeadIds,
       rep_ids:  repIds,
