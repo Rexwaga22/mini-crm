@@ -21,7 +21,7 @@ export default async function AssignmentPage() {
 
   // Get current lead count per rep
   const repStats = await Promise.all(
-    (reps ?? []).map(async rep => {
+    (reps ?? []).map(async (rep: any) => {
       const { count } = await supabase
         .from('leads')
         .select('*', { count: 'exact', head: true })
