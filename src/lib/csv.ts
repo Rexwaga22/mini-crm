@@ -1,3 +1,4 @@
+// @ts-expect-error - external module declaration
 import Papa, { ParseResult } from 'papaparse'
 import { normalisePhone } from './phone'
 

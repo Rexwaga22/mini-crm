@@ -47,7 +47,7 @@ export default async function AssignmentPage() {
   return (
     <AssignmentClient
       unassignedCount={totalUnassigned}
-      unassignedLeadIds={(unassignedLeads ?? []).map(l => l.id)}
+      unassignedLeadIds={(unassignedLeads ?? []).map((l: any) => l.id)}
       distribution={distribution}
       repCount={activeReps.length}
     />

@@ -40,7 +40,7 @@ export default function SalesViewClient({ leads, outcomeOptions, repId }: Props)
     setSaving(leadId)
     const { data, error } = await supabase
       .from('leads')
-      .update({ [field]: value })
+      .update({ [field]: value } as any)
       .eq('id', leadId)
       .select()
       .single()

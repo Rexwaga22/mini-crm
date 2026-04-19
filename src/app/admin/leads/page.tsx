@@ -11,7 +11,7 @@ export default async function LeadsPage() {
   ] = await Promise.all([
     supabase
       .from('leads')
-      .select('*, profiles:assigned_to(full_name)')
+      .select('*, profiles!leads_assigned_to_fkey(full_name)')
       .order('created_at', { ascending: false })
       .limit(200),
     supabase
@@ -29,7 +29,7 @@ export default async function LeadsPage() {
 
   return (
     <LeadsClient
-      initialLeads={leads ?? []}
+      initialLeads={(leads as any) ?? []}
       reps={profiles ?? []}
       outcomeOptions={(outcomeOptions ?? []).map(o => o.label)}
     />
