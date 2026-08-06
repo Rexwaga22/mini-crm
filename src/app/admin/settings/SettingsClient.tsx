@@ -26,7 +26,6 @@ export default function SettingsClient({ users, outcomes, inactivityThreshold }:
   // New user form
   const [newName,     setNewName]     = useState('')
   const [newEmail,    setNewEmail]    = useState('')
-  const [newPassword, setNewPassword] = useState('')
   const [newRole,     setNewRole]     = useState<'admin' | 'sales'>('sales')
   const [newCapacity, setNewCapacity] = useState(100)
   const [newOutcome,  setNewOutcome]  = useState('')
@@ -37,18 +36,18 @@ export default function SettingsClient({ users, outcomes, inactivityThreshold }:
   }
 
   async function createUser() {
-    if (!newEmail || !newPassword || !newName) return
+    if (!newEmail || !newName) return
     setLoading('create-user')
 
     const res = await fetch('/api/admin/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: newEmail, password: newPassword, full_name: newName, role: newRole, capacity: newCapacity }),
+      body: JSON.stringify({ email: newEmail, full_name: newName, role: newRole, capacity: newCapacity }),
     })
 
     if (res.ok) {
       showToast(`${newName} created successfully`)
-      setNewName(''); setNewEmail(''); setNewPassword(''); setNewRole('sales'); setNewCapacity(100)
+      setNewName(''); setNewEmail(''); setNewRole('sales'); setNewCapacity(100)
       router.refresh()
     } else {
       const body = await res.json()
@@ -157,10 +156,6 @@ export default function SettingsClient({ users, outcomes, inactivityThreshold }:
                 <input className="form-control" type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="jane@company.com" />
               </div>
               <div className="form-group">
-                <label className="form-label">Password</label>
-                <input className="form-control" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Temporary password" />
-              </div>
-              <div className="form-group">
                 <label className="form-label">Role</label>
                 <select className="form-control" value={newRole} onChange={e => setNewRole(e.target.value as 'admin' | 'sales')}>
                   <option value="sales">Sales Rep</option>
@@ -177,7 +172,7 @@ export default function SettingsClient({ users, outcomes, inactivityThreshold }:
             <button
               className="btn btn-primary"
               onClick={createUser}
-              disabled={loading === 'create-user' || !newEmail || !newPassword || !newName}
+              disabled={loading === 'create-user' || !newEmail || !newName}
             >
               <UserPlus size={15} />
               {loading === 'create-user' ? 'Creating…' : 'Create User'}

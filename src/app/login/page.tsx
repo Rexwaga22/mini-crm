@@ -1,40 +1,34 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
   const supabase = createClient()
 
-  const [email, setEmail]       = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
+  const [email, setEmail]     = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
+  const [sent, setSent]       = useState(false)
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleSendLink(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    const { error: authError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
 
-    if (authError || !data.user) {
-      setError(authError?.message ?? 'Invalid email or password.')
-      setLoading(false)
-      return
+    if (authError) {
+      setError(authError.message)
+    } else {
+      setSent(true)
     }
-
-    // Fetch role for redirect
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-
-    router.push(profile?.role === 'admin' ? '/admin' : '/sales')
-    router.refresh()
+    setLoading(false)
   }
 
   return (
@@ -73,60 +67,58 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">Work Email</label>
-            <input
-              id="email"
-              type="email"
-              className="form-control"
-              placeholder="name@company.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-1)' }}>
-              <label className="form-label" htmlFor="password" style={{ margin: 0 }}>Password</label>
+        {sent ? (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 'var(--font-body)', marginBottom: 'var(--space-4)' }}>
+              We sent a sign-in link to <strong>{email}</strong>. Open it on this device to continue.
             </div>
-            <input
-              id="password"
-              type="password"
-              className="form-control"
-              placeholder="••••••••"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+            <button
+              type="button"
+              className="btn btn-secondary w-full"
+              onClick={() => setSent(false)}
+            >
+              Use a different email
+            </button>
           </div>
-
-          {error && (
-            <div style={{
-              background: 'var(--color-error-bg)',
-              color: 'var(--color-error)',
-              padding: 'var(--space-3)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 'var(--font-table)',
-              marginBottom: 'var(--space-4)',
-            }}>
-              {error}
+        ) : (
+          <form onSubmit={handleSendLink}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="email">Work Email</label>
+              <input
+                id="email"
+                type="email"
+                className="form-control"
+                placeholder="name@company.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="btn btn-primary w-full btn-lg"
-            disabled={loading}
-            style={{ marginTop: 'var(--space-2)' }}
-          >
-            {loading ? 'Signing in…' : 'Login →'}
-          </button>
-        </form>
+            {error && (
+              <div style={{
+                background: 'var(--color-error-bg)',
+                color: 'var(--color-error)',
+                padding: 'var(--space-3)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--font-table)',
+                marginBottom: 'var(--space-4)',
+              }}>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary w-full btn-lg"
+              disabled={loading || !email}
+              style={{ marginTop: 'var(--space-2)' }}
+            >
+              {loading ? 'Sending…' : 'Send Sign-In Link →'}
+            </button>
+          </form>
+        )}
 
         <div style={{ textAlign: 'center', marginTop: 'var(--space-6)', fontSize: 'var(--font-table)', color: 'var(--color-on-surface-variant)' }}>
           Need help?{' '}

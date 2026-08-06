@@ -29,6 +29,10 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Public routes — allow unauthenticated
+  if (pathname.startsWith('/auth/callback')) {
+    return supabaseResponse
+  }
+
   if (pathname.startsWith('/login')) {
     if (user) {
       // Already logged in — redirect based on role
