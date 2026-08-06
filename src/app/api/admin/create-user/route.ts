@@ -19,17 +19,17 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { email, password, full_name, role, capacity } = body
+  const { email, full_name, role, capacity } = body
 
-  if (!email || !password || !full_name) {
+  if (!email || !full_name) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
   // Create auth user via service role — we use the anon client here;
-  // in production this should use a service-role key server-side
+  // in production this should use a service-role key server-side.
+  // No password is set: users sign in via passwordless magic link.
   const { data: newUser, error: authErr } = await supabase.auth.admin.createUser({
     email,
-    password,
     email_confirm: true,
     user_metadata: { full_name, role: role ?? 'sales' },
   })
