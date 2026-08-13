@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { getGoldPrice } from '@/lib/goldApi'
-import { Globe, UserX, MessageSquare, Timer, AlertTriangle, TrendingUp, TrendingDown, Users, Coins } from 'lucide-react'
+import { getCryptoMovers } from '@/lib/cryptoApi'
+import { getForexMovers } from '@/lib/forexApi'
+import MoversCard from '@/components/markets/MoversCard'
+import { Globe, UserX, MessageSquare, Timer, AlertTriangle, TrendingUp, TrendingDown, Users, Coins, Bitcoin, Landmark } from 'lucide-react'
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'
@@ -23,8 +26,17 @@ export default async function AdminDashboardPage() {
     supabase.from('leads').select('*', { count: 'exact', head: true }).eq('contact_status', 'Callback Scheduled'),
   ])
 
-  // ── Live Gold Price ──
-  const goldPrice = await getGoldPrice().catch(() => null)
+  // ── Live Gold Price & Market Movers ──
+  const [goldPrice, cryptoMoversRaw, forexMovers] = await Promise.all([
+    getGoldPrice().catch(() => null),
+    getCryptoMovers().catch(() => null),
+    getForexMovers().catch(() => null),
+  ])
+
+  const cryptoMovers = cryptoMoversRaw && {
+    gainers: cryptoMoversRaw.gainers.map(({ symbol, name, price, changePercent24h }) => ({ symbol, name, price, changePercent: changePercent24h })),
+    losers: cryptoMoversRaw.losers.map(({ symbol, name, price, changePercent24h }) => ({ symbol, name, price, changePercent: changePercent24h })),
+  }
 
   // ── Inactivity Report ──
   const { data: inactivityReport } = await supabase.rpc('get_inactivity_report')
@@ -102,6 +114,31 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Crypto & Forex Movers */}
+      <MoversCard
+        title="Crypto Movers"
+        subtitle="Top 100 by Mkt Cap · 24h"
+        Icon={Bitcoin}
+        gainers={cryptoMovers?.gainers ?? []}
+        losers={cryptoMovers?.losers ?? []}
+        formatPrice={(price) =>
+          `$${price.toLocaleString(undefined, { minimumFractionDigits: price < 1 ? 4 : 2, maximumFractionDigits: price < 1 ? 4 : 2 })}`
+        }
+        emptyLabel="Crypto data unavailable"
+        emptyBody="Could not reach CoinGecko — try again shortly."
+      />
+
+      <MoversCard
+        title="Forex Movers"
+        subtitle="Major Pairs · Live"
+        Icon={Landmark}
+        gainers={forexMovers?.gainers ?? []}
+        losers={forexMovers?.losers ?? []}
+        formatPrice={(price) => price.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+        emptyLabel="Forex data unavailable"
+        emptyBody="Check that TWELVEDATA_API_KEY is configured."
+      />
 
       {/* Inactivity Alert Panel */}
       {inactivityReport && inactivityReport.length > 0 && (

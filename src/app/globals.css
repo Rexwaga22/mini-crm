@@ -322,6 +322,56 @@ img { display: block; max-width: 100%; }
 
 .card-title { font-size: var(--font-title); font-weight: 600; }
 
+/* ── MARKET MOVERS ── */
+.movers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.movers-col-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-label);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.movers-list { display: flex; flex-direction: column; }
+
+.mover-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+.mover-row:last-child { border-bottom: none; }
+
+.mover-id { display: flex; flex-direction: column; min-width: 0; }
+.mover-symbol { font-size: var(--font-table); font-weight: 600; }
+.mover-name {
+  font-size: var(--font-label);
+  color: var(--color-on-surface-variant);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mover-figures { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+.mover-price { font-size: var(--font-table); font-weight: 500; }
+.mover-change {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-label);
+  font-weight: 600;
+}
+
 /* ── INACTIVITY ALERT ── */
 .inactivity-panel {
   background: var(--color-amber-bg);
@@ -882,6 +932,8 @@ select.form-control {
   .lead-card-body { flex-direction: column; }
   .lead-actions { width: 100%; }
   .lead-action-group { min-width: auto; flex: 1; }
+  .card-header { flex-wrap: wrap; gap: var(--space-2); }
+  .movers-grid { grid-template-columns: 1fr; gap: var(--space-4); }
 }
 
 @media (max-width: 480px) {
