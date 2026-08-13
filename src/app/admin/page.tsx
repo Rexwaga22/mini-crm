@@ -1,9 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
-import { getGoldPrice } from '@/lib/goldApi'
 import { getCryptoMovers } from '@/lib/cryptoApi'
 import { getForexMovers } from '@/lib/forexApi'
 import MoversCard from '@/components/markets/MoversCard'
-import { Globe, UserX, MessageSquare, Timer, AlertTriangle, TrendingUp, TrendingDown, Users, Coins, Bitcoin, Landmark } from 'lucide-react'
+import { Globe, UserX, MessageSquare, Timer, AlertTriangle, TrendingUp, Users, Bitcoin, Landmark } from 'lucide-react'
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'
@@ -26,9 +25,8 @@ export default async function AdminDashboardPage() {
     supabase.from('leads').select('*', { count: 'exact', head: true }).eq('contact_status', 'Callback Scheduled'),
   ])
 
-  // ── Live Gold Price & Market Movers ──
-  const [goldPrice, cryptoMoversRaw, forexMovers] = await Promise.all([
-    getGoldPrice().catch(() => null),
+  // ── Market Movers ──
+  const [cryptoMoversRaw, forexMovers] = await Promise.all([
     getCryptoMovers().catch(() => null),
     getForexMovers().catch(() => null),
   ])
@@ -70,49 +68,6 @@ export default async function AdminDashboardPage() {
             <div className="stat-value">{value.toLocaleString()}</div>
           </div>
         ))}
-      </div>
-
-      {/* Live Gold Price */}
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">
-            <span style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-              <Coins size={18} />
-              Gold Spot Price
-            </span>
-          </h2>
-          <span className="text-label text-muted">XAU/USD · Live</span>
-        </div>
-
-        {!goldPrice ? (
-          <div className="empty-state">
-            <div className="empty-state-icon"><Coins size={40} /></div>
-            <div className="empty-state-title">Gold price unavailable</div>
-            <div className="empty-state-body">Check that GOLDAPI_KEY is configured.</div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
-            <div className="stat-value">
-              ${goldPrice.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                color: goldPrice.change >= 0 ? 'var(--color-green)' : 'var(--color-red)',
-                fontWeight: 600,
-              }}
-            >
-              {goldPrice.change >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-              {goldPrice.change >= 0 ? '+' : ''}
-              {goldPrice.change.toFixed(2)} ({goldPrice.changePercent.toFixed(2)}%)
-            </div>
-            <div className="text-label text-muted">
-              ${goldPrice.pricePerGram24k.toFixed(2)} / gram (24k)
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Crypto & Forex Movers */}
